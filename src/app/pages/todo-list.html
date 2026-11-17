@@ -1,0 +1,48 @@
+<section class="intro">
+  <div><p class="eyebrow">IL TUO SPAZIO DI LAVORO</p><h1>Una cosa alla volta.</h1><p class="subtitle">Esplora le attività, trova le priorità e aggiungi la prossima idea.</p></div>
+  <button class="primary" (click)="showForm.set(!showForm())" [attr.aria-expanded]="showForm()" aria-controls="new-todo">{{ showForm() ? 'Chiudi modulo' : '+ Nuova attività' }}</button>
+</section>
+<section class="stats" aria-label="Riepilogo attività">
+  <div><span>Attività totali</span><strong>{{ total() }}</strong><small>Tutto in un unico posto</small></div>
+  <div><span>Da completare</span><strong>{{ pendingCount() }}</strong><small>Il prossimo passo comincia qui</small></div>
+  <div class="green"><span>Completate</span><strong>{{ completedCount() }}</strong><small>Un passo avanti, ogni giorno</small></div>
+</section>
+@if (success()) { <p role="status" class="success">Attività creata. Rimane disponibile in questa sessione.</p> }
+@if (showForm()) {
+  <section id="new-todo" class="panel form-panel">
+    <p class="eyebrow">UN NUOVO INIZIO</p><h2>Nuova attività</h2>
+    <p class="muted">L’API è dimostrativa: le attività create si perdono ricaricando la pagina.</p>
+    <form #form="ngForm" (ngSubmit)="create(form)">
+      <label for="title">Titolo</label>
+      <input id="title" name="title" [(ngModel)]="title" required maxlength="200" placeholder="Che cosa vuoi fare?">
+      <label for="userId">ID utente</label>
+      <input id="userId" name="userId" type="number" [(ngModel)]="userId" required min="1" max="10" step="1" pattern="[0-9]+">
+      <label class="check"><input name="completed" type="checkbox" [(ngModel)]="completed"> Già completata</label>
+      @if (service.saveError()) { <p role="alert" class="error">{{ service.saveError() }}</p> }
+      <button class="primary" type="submit" [disabled]="form.invalid || !title.trim() || service.saving()">{{ service.saving() ? 'Salvataggio…' : 'Crea attività' }}</button>
+    </form>
+  </section>
+}
+<section class="panel" [attr.aria-busy]="service.loading()" aria-labelledby="list-title">
+  <div class="panel-heading"><div><p class="eyebrow">LA TUA LISTA</p><h2 id="list-title">Tutte le attività <span class="count">{{ filtered().length }}</span></h2></div><button class="secondary" (click)="reload()" [disabled]="service.loading()">↻ Aggiorna</button></div>
+  <div class="filters">
+    <div class="search"><label for="query">Cerca per titolo</label><input id="query" type="search" placeholder="Cerca un’attività…" [ngModel]="query()" (ngModelChange)="query.set($event)"></div>
+    <div><label for="status">Stato</label><select id="status" [ngModel]="status()" (ngModelChange)="status.set($event)"><option value="all">Tutti gli stati</option><option value="pending">Da completare</option><option value="done">Completate</option></select></div>
+  </div>
+  @if (service.loading()) {
+    <div class="empty" role="status"><span class="spinner"></span> Caricamento delle attività…</div>
+  } @else if (service.error()) {
+    <div class="empty"><p role="alert" class="error">{{ service.error() }}</p><button class="secondary" (click)="reload()">Riprova</button></div>
+  } @else {
+    <div class="list-caption"><span>ATTIVITÀ</span><span>STATO / DETTAGLIO</span></div>
+    @for (todo of filtered(); track todo.id) {
+      <a class="todo-row" [routerLink]="['/todos', todo.id]">
+        <span class="status-icon" [class.is-done]="todo.completed" aria-hidden="true">{{ todo.completed ? '✓' : '○' }}</span>
+        <span class="todo-title"><strong>{{ todo.title }}</strong><small>#{{ todo.id }} <span>·</span> Utente {{ todo.userId }}</small></span>
+        <span class="badge" [class.done]="todo.completed">{{ todo.completed ? 'Completata' : 'Da completare' }}</span><span aria-hidden="true" class="arrow">↗</span>
+      </a>
+    } @empty {
+      <div class="empty"><h3>Nessuna attività trovata</h3><p>Prova a cambiare la ricerca o il filtro.</p></div>
+    }
+  }
+</section>
