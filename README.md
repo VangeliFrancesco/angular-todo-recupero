@@ -2,8 +2,6 @@
 
 Progetto per il recupero di Informatica: gestione della risorsa **todos** di [JSONPlaceholder](https://jsonplaceholder.typicode.com/).
 
-Account scelto per la consegna: **alexsiviper95**. I nomi degli altri componenti e le rispettive parti vanno aggiunti quando il gruppo è definito.
-
 ## Avvio
 
 Installa Node.js 24 LTS, che include npm. Dal terminale nella cartella del progetto:
